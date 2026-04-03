@@ -1,2 +1,11 @@
-# SchoolMischief
-School Mischief! — Bhawana Ma'am sleeps at her desk in an SMS Gurugram classroom. Cause chaos, do pranks &amp; earn points — but sit down the moment she wakes or lose a life! 94 pranks, 4 powerups, multiplayer, leaderboards &amp; chiptune music. One HTML file, zero dependencies.
+# 🏫 School Mischief!
+
+Bhawana Ma'am sleeps at her desk in an SMS Gurugram classroom. Cause chaos, do pranks & earn points — but sit down the moment she wakes or lose a life! 94 pranks, 4 powerups, multiplayer, leaderboards & chiptune music. One HTML file, zero dependencies.
+
+## ▶ Play
+Open `index.html` in any browser — or visit the live site after deploying to GitHub Pages.
+
+## 🚀 Deploy to GitHub Pages
+1. Upload `index.html` and `README.md` to a **public** repo
+2. Go to **Settings → Pages → Source: Deploy from a branch → main → / (root) → Save**
+3. Live at `https://yourusername.github.io/reponame/` in ~2 minutes
