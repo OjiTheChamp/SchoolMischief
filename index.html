@@ -141,10 +141,22 @@ body{background:#1a1a2e;font-family:'Nunito',sans-serif;overflow:hidden;user-sel
 .ps2-btn:hover{background:rgba(168,85,247,.5);transform:translateY(-1px);}
 .ps2-inp{width:70px;padding:2px 6px;border-radius:10px;border:1.5px solid #a855f7;background:rgba(0,0,0,.5);color:#fff;font-size:12px;text-align:center;outline:none;}
 
+
+#ranks-corner{position:fixed;top:10px;left:10px;z-index:200;pointer-events:all;}
+#ranks-corner button{background:rgba(10,10,30,.85);border:2px solid #38bdf8;border-radius:14px;color:#38bdf8;font-family:'Fredoka One',cursive;font-size:14px;padding:6px 14px;cursor:pointer;transition:all .15s;}
+#ranks-corner button:hover{background:rgba(56,189,248,.2);transform:translateY(-2px);}
+
+
+#ps-corner{position:fixed;top:10px;right:10px;z-index:200;pointer-events:all;}
+#ps-corner button{background:rgba(88,28,135,.85);border:2px solid #a855f7;border-radius:14px;color:#e9d5ff;font-family:'Fredoka One',cursive;font-size:14px;padding:6px 14px;cursor:pointer;transition:all .15s;}
+#ps-corner button:hover{background:rgba(168,85,247,.4);transform:translateY(-2px);}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
 </head>
 <body>
+<div id="ps-corner"><button onclick="openIgShop()">🛍️ Power Shop</button></div>
+<div id="ranks-corner"><button onclick="openLb()">🏆 Ranks</button></div>
 <div id="ps2-bar">
   <span class="ps2-title">⚡ Power Shop 2</span>
   <span class="ps2-wins">🏆 <span id="ps2-wins-disp">0</span> wins</span>
@@ -180,17 +192,13 @@ body{background:#1a1a2e;font-family:'Nunito',sans-serif;overflow:hidden;user-sel
 <button id="leave-btn" onclick="leaveGame()">🚪 Leave</button>
 <div id="survive-bar">⏱ Survive bonus in: <span id="survive-cd">60s</span></div>
 <div id="powerup-bar">
-  <button class="pup-btn" id="btn-dance" onclick="activatePowerup('dance')"><span class="icon">💃</span>Dance<div class="pup-cd" id="cd-dance" style="width:100%"></div></button>
-  <button class="pup-btn" id="btn-talk" onclick="activatePowerup('talk')"><span class="icon">💬</span>Talk<div class="pup-cd" id="cd-talk" style="width:100%"></div></button>
   <button class="pup-btn" id="btn-score" onclick="activatePowerup('score')"><span class="icon">🎯</span>Score Run<div class="pup-cd" id="cd-score" style="width:100%"></div></button>
   <button class="pup-btn" id="btn-hide" onclick="activatePowerup('hide')"><span class="icon">🫥</span>Hide<div class="pup-cd" id="cd-hide" style="width:100%"></div></button>
   <button class="pup-btn" id="btn-sit" onclick="sitDown()"><span class="icon">🪑</span>Sit!</button>
   <button class="pup-btn" id="btn-store" onclick="openStore()"><span class="icon">🛒</span>Shop</button>
   <button class="pup-btn" id="prank-btn" onclick="openPranks()"><span class="icon">😈</span>Pranks</button>
-  <button class="pup-btn" id="igshop-btn" onclick="openIgShop()"><span class="icon">🛍️</span>Buy Powers</button>
   <button class="pup-btn" id="usepower-btn" onclick="openUsePanel()" style="border-color:rgba(34,211,238,.6);background:rgba(6,182,212,.12)"><span class="icon">⚡</span>Use<span id="usepower-count" style="display:none;position:absolute;top:3px;right:3px;background:#22d3ee;color:#000;border-radius:8px;font-size:9px;font-weight:800;padding:1px 4px">0</span></button>
   <button class="pup-btn" id="mp-btn-hud" onclick="openMpPanel()"><span class="icon">🌐</span>Multi</button>
-  <button class="pup-btn" id="lb-btn" onclick="openLb()"><span class="icon">🏆</span>Ranks</button>
   <button class="pup-btn" onclick="togglePs2()" style="border-color:rgba(168,85,247,.7);background:rgba(88,28,135,.6)"><span class="icon">⚡</span>Shop 2</button>
 </div>
 <!-- dpad removed: drag controls only -->
@@ -949,7 +957,7 @@ function sitDown(){
   Object.keys(powerups).forEach(k=>{
     const p=powerups[k];
     if(p.active){p.active=false;p.timer=0;p.cd=Math.floor(p.maxCd*.3);
-      document.getElementById('btn-'+k).classList.remove('active');
+      (document.getElementById('btn-'+k)||{classList:{remove:()=>{}}}).classList.remove('active');
       if(k==='score')orbs.length=0;}
   });
   const b=document.getElementById('btn-sit');
@@ -964,7 +972,7 @@ function activatePowerup(name){
   const p=powerups[name];if(p.cd>0||p.active)return;
   p.active=true;p.timer=p.duration;player.activity=name;player.sitting=false;
   sfx(name);
-  document.getElementById('btn-'+name).classList.add('active');
+  (document.getElementById('btn-'+name)||{classList:{add:()=>{}}}).classList.add('active');
   const msgs={dance:['💃 DANCE PARTY!','Bust those moves!'],talk:['💬 GOSSIP TIME!','Spill the tea!'],score:['⚡ SCORE RUN!','Grab those stars!'],hide:['🫥 GONE GHOST!','Invisible!']};
   showMsg(msgs[name][0],msgs[name][1],1600);
   if(name==='score')spawnOrbs();
@@ -1059,12 +1067,12 @@ function loseLife(){
     teacher.angry=false;
     player.x=player.seatX;player.y=player.seatY;player.sitting=true;
     player.activity='idle';player.hidden=false;orbs.length=0;
-    Object.keys(powerups).forEach(k=>{const p=powerups[k];p.active=false;p.cd=p.maxCd*.5;document.getElementById('btn-'+k).classList.remove('active');});
+    Object.keys(powerups).forEach(k=>{const p=powerups[k];p.active=false;p.cd=p.maxCd*.5;(document.getElementById('btn-'+k)||{classList:{remove:()=>{}}}).classList.remove('active');});
     showMsg('🛡️ Shield blocked it!',shieldCharges+' charge'+(shieldCharges===1?'':'s')+' left',2000);
     setTimeout(()=>{ caught=false; },2500);
     return;
   }
-  Object.keys(powerups).forEach(k=>{const p=powerups[k];p.active=false;p.cd=p.maxCd*.5;document.getElementById('btn-'+k).classList.remove('active');});
+  Object.keys(powerups).forEach(k=>{const p=powerups[k];p.active=false;p.cd=p.maxCd*.5;(document.getElementById('btn-'+k)||{classList:{remove:()=>{}}}).classList.remove('active');});
   player.activity='idle';player.hidden=false;
   player.x=player.seatX;player.y=player.seatY;player.sitting=true;orbs.length=0;
   if(lives<=0){endGame();return;}
@@ -1820,17 +1828,17 @@ function update(ts){
       if(phase==='free'&&frameCount%60===0)addScore(p.basePts,player.x,player.y-48);
       if(p.timer<=0){
         p.active=false;p.cd=p.maxCd;player.activity='idle';player.hidden=false;
-        document.getElementById('btn-'+k).classList.remove('active');
+        (document.getElementById('btn-'+k)||{classList:{remove:()=>{}}}).classList.remove('active');
         if(k==='score')orbs.length=0;
         // bonus for completing full run
         addScore(30,player.x,player.y-60);
         showMsg('🎖 Activity Done!','+30 completion bonus',1300);
       }
     }
-    if(p.cd>0){p.cd--;if(p.cd<=0)document.getElementById('btn-'+k).classList.remove('disabled');}
+    if(p.cd>0){p.cd--;if(p.cd<=0)(document.getElementById('btn-'+k)||{classList:{remove:()=>{}}}).classList.remove('disabled');}
     const pct=p.cd>0?((p.maxCd-p.cd)/p.maxCd*100):100;
-    document.getElementById('cd-'+k).style.width=pct+'%';
-    if(p.cd>0)document.getElementById('btn-'+k).classList.add('disabled');
+    const _cd=document.getElementById('cd-'+k);if(_cd)_cd.style.width=pct+'%';
+    if(p.cd>0)(document.getElementById('btn-'+k)||{classList:{add:()=>{}}}).classList.add('disabled');
   });
 
   player.hidden=powerups.hide.active;
@@ -2499,8 +2507,8 @@ function startGame(diff){
   teacher.sleeping=true;teacher.angry=false;teacher.snoreTimer=0;teacher.snoreFrame=0;teacher.alertRadius=cfg.alertR;
   Object.keys(powerups).forEach(k=>{
     powerups[k].cd=0;powerups[k].active=false;powerups[k].timer=0;
-    document.getElementById('btn-'+k).classList.remove('active','disabled');
-    document.getElementById('cd-'+k).style.width='100%';
+    (document.getElementById('btn-'+k)||{classList:{remove:()=>{}}}).classList.remove('active','disabled');
+    const _cdi=document.getElementById('cd-'+k);if(_cdi)_cdi.style.width='100%';
   });
   orbs.length=0;phase='free';
   updateHUD();updateStatusBadge();
