@@ -6,9 +6,10 @@
 <title>School Mischief!</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#1a1a2e;font-family:'Nunito',sans-serif;overflow:hidden;user-select:none;}
-#game-canvas{display:block;margin:0 auto;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+#game-canvas{touch-action:none;display:block;margin:0 auto;}
+body{background:#1a1a2e;font-family:'Nunito',sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;touch-action:none;}
+#game-canvas{display:block;margin:0 auto;touch-action:none;-webkit-user-select:none;}
 #hud{position:fixed;top:10px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;background:rgba(0,0,0,0.75);border-radius:30px;padding:7px 18px;pointer-events:all;z-index:100;flex-wrap:wrap;justify-content:center;}
 #hud .stat{color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;gap:4px;pointer-events:none;}
 #score-val{color:#FFD700;}#lives-val{color:#ff6b6b;}#mult-val{color:#a78bfa;}
@@ -16,7 +17,7 @@ body{background:#1a1a2e;font-family:'Nunito',sans-serif;overflow:hidden;user-sel
 .badge-free{background:#2ecc71;color:#fff;}.badge-danger{background:#e74c3c;color:#fff;animation:pulse .5s infinite alternate;}.badge-gone{background:#3498db;color:#fff;}
 @keyframes pulse{from{opacity:1}to{opacity:.5}}
 #powerup-bar{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;pointer-events:all;z-index:100;}
-.pup-btn{width:68px;height:68px;border-radius:13px;border:3px solid rgba(255,255,255,0.25);background:rgba(0,0,0,0.78);color:#fff;font-size:10px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all .15s;position:relative;overflow:hidden;}
+.pup-btn{width:68px;height:68px;border-radius:13px;border:3px solid rgba(255,255,255,0.25);background:rgba(0,0,0,0.78);color:#fff;font-size:10px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all .15s;position:relative;overflow:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
 .pup-btn:hover{transform:translateY(-3px);border-color:#FFD700;}.pup-btn.active{border-color:#2ecc71;background:rgba(46,204,113,0.28);}.pup-btn.disabled{opacity:.35;cursor:not-allowed;}
 .pup-btn .icon{font-size:24px;}.pup-cd{position:absolute;bottom:0;left:0;right:0;height:4px;background:#FFD700;transition:width .1s linear;}
 #btn-sit{border-color:rgba(52,152,219,0.6);}#btn-store{border-color:rgba(168,85,247,0.7);background:rgba(88,28,135,0.6);}
@@ -129,6 +130,11 @@ body{background:#1a1a2e;font-family:'Nunito',sans-serif;overflow:hidden;user-sel
 #mp-btn-hud{border-color:rgba(88,166,255,.7);background:rgba(13,17,23,.7);}
 .mp-ping{position:fixed;bottom:96px;right:12px;background:rgba(0,0,0,.7);color:#22d3ee;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;pointer-events:none;z-index:100;display:none;}
 
+
+/* Leave button — fixed position, away from gameplay */
+#leave-btn{position:fixed;bottom:96px;right:10px;background:rgba(185,28,28,0.85);border:2px solid #ef4444;border-radius:12px;color:#fff;font-family:'Fredoka One',cursive;font-size:12px;padding:6px 12px;cursor:pointer;pointer-events:all;z-index:200;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+#leave-btn:active{background:rgba(220,38,38,1);}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
 </head>
@@ -141,9 +147,9 @@ body{background:#1a1a2e;font-family:'Nunito',sans-serif;overflow:hidden;user-sel
   <div id="status-badge" class="badge-free">FREE!</div>
   <div class="stat" id="shield-hud" style="color:#60a5fa"></div>
   <div class="stat">🏆 <span id="wins-val">0</span></div>
-  <button onclick="leaveGame()" style="background:rgba(239,68,68,.8);border:2px solid #ef4444;border-radius:16px;color:#fff;font-family:'Fredoka One',cursive;font-size:12px;padding:4px 10px;cursor:pointer;pointer-events:all;" title="Leave game">🚪 Leave</button>
   <button id="music-toggle-btn" onclick="toggleMusic()" style="background:rgba(34,211,238,.2);border:2px solid #22d3ee;border-radius:16px;color:#fff;font-family:'Fredoka One',cursive;font-size:12px;padding:4px 10px;cursor:pointer;pointer-events:all;" title="Toggle music">🎵</button>
 </div>
+<button id="leave-btn" onclick="leaveGame()">🚪 Leave</button>
 <div id="survive-bar">⏱ Survive bonus in: <span id="survive-cd">60s</span></div>
 <div id="powerup-bar">
   <button class="pup-btn" id="btn-dance" onclick="activatePowerup('dance')"><span class="icon">💃</span>Dance<div class="pup-cd" id="cd-dance" style="width:100%"></div></button>
@@ -254,6 +260,11 @@ const canvas=document.getElementById('game-canvas');
 const ctx=canvas.getContext('2d');
 function resize(){canvas.width=Math.min(window.innerWidth,900);canvas.height=Math.min(window.innerHeight,650);}
 resize();window.addEventListener('resize',resize);
+document.addEventListener('contextmenu',e=>e.preventDefault());
+// Prevent all default touch behaviour on canvas (no scroll, no zoom, no select)
+canvas.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
+canvas.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+canvas.addEventListener('touchend',e=>e.preventDefault(),{passive:false});
 
 // Polyfill ctx.roundRect
 if(!CanvasRenderingContext2D.prototype.roundRect){
@@ -563,7 +574,7 @@ function applyIgPower(id){
 const TUT_PAGES=[
   {title:"Welcome to School Mischief!",emoji:"🏫",body:"Bhawana Ma'am is your teacher. She sleeps at her desk and when she does, it is CHAOS TIME! Your goal: survive her wake cycles without getting caught. Win by lasting long enough with lives remaining!"},
   {title:"Sleep and Wake Cycles",emoji:"💤",body:"Bhawana alternates between sleeping and being awake. When SLEEPING: do pranks, dance, talk, collect stars. When AWAKE: SIT DOWN immediately or you will lose a life! She sees the ENTIRE classroom — no hiding spot except the Sit button!"},
-  {title:"Controls",emoji:"🎮",body:"WASD or Arrow Keys to move around. SPACE or the Sit button to instantly teleport to your seat. Click powerup buttons at the bottom to activate abilities. Escape closes any open panel."},
+  {title:"Controls",emoji:"🎮",body:"Drag your character to move! Click and drag the YOU stickman to walk around. SPACE or the Sit button to instantly teleport to your seat. Click powerup buttons at the bottom to activate abilities. Escape closes any open panel."},
   {title:"Pranks and Powerups",emoji:"😈",body:"Dance: earn pts dancing on desks. Talk: gossip for points. Score Run: collect floating stars. Hide: go invisible so Bhawana cannot catch you. Open the Prank Menu for 94 pranks sorted by tier — each one earns bonus points!"},
   {title:"Shops and Upgrades",emoji:"🛒",body:"Shop: buy extra lives, shield (blocks 3 catches), and point multipliers 2x to 6x. Buy Powers: spend WINS to stock up on powers (buy as many as you want!). Use the ⚡ Use button in-game to activate stocked powers."},
   {title:"Winning and Leaderboard",emoji:"🏆",body:"Win by surviving enough wake cycles. Easy: +1 win, Medium: +5, Hard: +50, Nightmare: +2000. Endless Mode runs forever — your survive time goes on the Endless leaderboard! Buy as many powers as you want with wins — stock them up before a run!"},
@@ -598,6 +609,14 @@ function renderTut(){
 // ── LEAVE GAME ─────────────────────────────────────────────────────
 function leaveGame(){
   if(state!=='playing') return;
+  // On mobile, require a second tap / confirm to prevent accidental leave
+  if(!leaveGame._armed){
+    leaveGame._armed=true;
+    showMsg('🚪 Tap Leave again to exit','',1800);
+    setTimeout(()=>{ leaveGame._armed=false; },2000);
+    return;
+  }
+  leaveGame._armed=false;
   sfx('leave');
   stopMusic();
   clearTimeout(teacherInterval);
@@ -684,7 +703,7 @@ const store={
 };
 
 // PLAYER
-const player={x:200,y:300,w:28,h:36,speed:2.8,baseSpeed:2.8,color:'#e67e22',activity:'idle',hidden:false,frame:0,frameTimer:0,seatX:200,seatY:300,sitting:false};
+const player={x:200,y:300,w:28,h:36,speed:2.8,baseSpeed:2.8,color:'#e67e22',activity:'idle',hidden:false,frame:0,frameTimer:0,seatX:200,seatY:300,sitting:false,dragging:false,dragX:200,dragY:300};
 loadWins();
 // TEACHER
 const teacher={w:36,h:46,visible:true,alertRadius:100,angry:false,sleeping:true,snoreTimer:0,snoreFrame:0};
@@ -721,6 +740,7 @@ const powerups={
 
 // INPUT
 const keys={};
+document.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('keydown',e=>{
   // Don't steal keys when user is typing in a text input
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
@@ -728,16 +748,65 @@ document.addEventListener('keydown',e=>{
   if(e.key===' '){sitDown();e.preventDefault();}
   if(e.key==='Escape'){closeStore();closePranks();closeLb();closeIgShop();closeTutorial();closeMpPanel();e.preventDefault();}
   // Arrow keys / WASD — prevent page scroll
-  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+
 });
 document.addEventListener('keyup',e=>{keys[e.key]=false;});
-['d-up','d-down','d-left','d-right'].forEach(id=>{
-  const el=document.getElementById(id);
-  el.addEventListener('touchstart',()=>{keys[id]=true;},{passive:true});
-  el.addEventListener('touchend',()=>{keys[id]=false;},{passive:true});
-  el.addEventListener('mousedown',()=>{keys[id]=true;});
-  el.addEventListener('mouseup',()=>{keys[id]=false;});
+// D-pad disabled — drag controls used instead
+
+// ── DRAG CONTROLS ──────────────────────────────────────────────
+function canvasPos(e){
+  const r=canvas.getBoundingClientRect();
+  const scaleX=canvas.width/r.width, scaleY=canvas.height/r.height;
+  const cx=(e.clientX||e.touches[0].clientX)-r.left;
+  const cy=(e.clientY||e.touches[0].clientY)-r.top;
+  return {x:cx*scaleX, y:cy*scaleY};
+}
+function hitPlayer(px,py){
+  return Math.abs(px-player.x)<player.w*1.8 && Math.abs(py-player.y)<player.h*1.8;
+}
+canvas.addEventListener('mousedown',e=>{
+  if(state!=='playing') return;
+  const pos=canvasPos(e);
+  if(hitPlayer(pos.x,pos.y)){
+    player.dragging=true;
+    player.dragX=pos.x;
+    player.dragY=pos.y;
+    e.preventDefault();
+  }
 });
+canvas.addEventListener('mousemove',e=>{
+  if(state==='playing'){
+    const pos=canvasPos(e);
+    canvas.style.cursor=hitPlayer(pos.x,pos.y)||player.dragging?'grab':'default';
+    if(player.dragging) canvas.style.cursor='grabbing';
+  }
+  if(!player.dragging) return;
+  const pos=canvasPos(e);
+  player.dragX=pos.x;
+  player.dragY=pos.y;
+  e.preventDefault();
+});
+canvas.addEventListener('mouseup',()=>{ player.dragging=false; });
+canvas.addEventListener('mouseleave',()=>{ player.dragging=false; });
+canvas.addEventListener('touchstart',e=>{
+  if(state!=='playing') return;
+  const pos=canvasPos(e);
+  if(hitPlayer(pos.x,pos.y)){
+    player.dragging=true;
+    player.dragX=pos.x;
+    player.dragY=pos.y;
+    e.preventDefault();
+  }
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  if(!player.dragging) return;
+  const pos=canvasPos(e);
+  player.dragX=pos.x;
+  player.dragY=pos.y;
+  e.preventDefault();
+},{passive:false});
+canvas.addEventListener('touchend',()=>{ player.dragging=false; });
+
 
 // HELPERS
 function dist(ax,ay,bx,by){return Math.sqrt((ax-bx)**2+(ay-by)**2);}
@@ -895,7 +964,8 @@ function winGame(){
   sfx('win');
   stopMusic();
   clearTimeout(teacherInterval);
-  state='gameover'; // stop update loop
+  state='gameover';
+  const lb4=document.getElementById('leave-btn');if(lb4)lb4.style.display='none';
   const earned=cfg.winsOnWin;
   totalWins+=earned;
   saveWins();
@@ -1686,13 +1756,18 @@ function update(ts){
   teacher.snoreTimer++;
   if(teacher.sleeping&&teacher.snoreTimer>80){teacher.snoreTimer=0;teacher.snoreFrame++;}
 
-  // Player move
-  let dx=0,dy=0;
-  if(keys['ArrowLeft']||keys['a']||keys['A']||keys['d-left'])dx-=1;
-  if(keys['ArrowRight']||keys['d']||keys['D']||keys['d-right'])dx+=1;
-  if(keys['ArrowUp']||keys['w']||keys['W']||keys['d-up'])dy-=1;
-  if(keys['ArrowDown']||keys['s']||keys['S']||keys['d-down'])dy+=1;
-  if(dx!==0||dy!==0){const len=Math.sqrt(dx*dx+dy*dy);player.sitting=false;player.x+=(dx/len)*player.speed;player.y+=(dy/len)*player.speed;}
+  // Player move — drag only
+  if(player.dragging){
+    const targetX=player.dragX, targetY=player.dragY;
+    const dx=targetX-player.x, dy=targetY-player.y;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist>2){
+      const spd=Math.min(player.speed*2,dist);
+      player.sitting=false;
+      player.x+=dx/dist*spd;
+      player.y+=dy/dist*spd;
+    }
+  }
   player.x=Math.max(player.w/2,Math.min(canvas.width-player.w/2,player.x));
   player.y=Math.max(canvas.height*.34,Math.min(canvas.height-player.h,player.y));
   player.frameTimer++;if(player.frameTimer>4){player.frame++;player.frameTimer=0;}
@@ -1768,6 +1843,16 @@ function draw(){
   kids.forEach(k=>drawStickKid(k.x,k.y,k.w,k.h,k.color,k.activity,k.frame||0,k.sitting,false,k.name,k.chatBubble,k.chatTimer));
   mpDrawRemotePlayers();
   drawStickKid(player.x,player.y,player.w,player.h,player.color,player.activity,player.frame,player.sitting,player.hidden,mpMyName||'YOU','',0);
+  // Drag hint for first 5 seconds
+  if(frameCount<300&&!player.dragging&&Math.floor(frameCount/30)%2===0){
+    ctx.save();
+    ctx.globalAlpha=0.75;
+    ctx.fillStyle='#FFD700';
+    ctx.font='bold 11px Nunito,sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText('👆 drag me',player.x,player.y-player.h-18);
+    ctx.restore();
+  }
   // Bhawana Ma'am always at her desk
   drawTeacherAtDesk();
   if(!teacher.sleeping){ctx.fillStyle='rgba(231,76,60,.04)';ctx.fillRect(0,0,canvas.width,canvas.height);}
@@ -2224,6 +2309,7 @@ function startGame(diff){
   difficulty=diff;cfg=DIFF[diff];
   document.getElementById('screen-overlay').style.display='none';
   document.getElementById('survive-bar').style.display='block';
+  const lb2=document.getElementById('leave-btn');if(lb2)lb2.style.display='block';
   state='playing';score=0;lives=cfg.lives;caught=false;alreadyCaughtThisVisit=false;
   multiplier=1;shieldCharges=0;gameTime=0;lastPassiveTime=0;frameCount=0;donePranks.clear();wakeCycles=0;
   store.mults.forEach(m=>m.owned=false);
@@ -2258,6 +2344,7 @@ function endGame(){
   stopMusic();
   state='gameover';clearTimeout(teacherInterval);
   document.getElementById('survive-bar').style.display='none';
+  const lb3=document.getElementById('leave-btn');if(lb3)lb3.style.display='none';
   const o=document.getElementById('screen-overlay');
   o.style.display='flex';o.style.background='rgba(0,0,0,0.93)';
   o.innerHTML=`
