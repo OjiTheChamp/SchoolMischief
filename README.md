@@ -3,5 +3,4 @@
 Bhawana Ma'am sleeps at her desk in an SMS Gurugram classroom. Cause chaos, do pranks & earn points — but sit down the moment she wakes or lose a life! 94 pranks, 4 powerups, multiplayer, leaderboards & chiptune music. One HTML file, zero dependencies.
 
 ## ▶ Play
-Open `index.html` in any browser — or visit the live site after deploying to GitHub Pages.
-
+Click https://ojithechamp.github.io/school-mischief/ in any browser 
